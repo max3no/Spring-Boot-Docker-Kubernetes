@@ -6,9 +6,9 @@
 </br>3-Expose it as a service</p>
 
 <h2>Installation:</h2>
-````
+```
 docker pull max3no/spring-boot-k8s
-````
+```
 
 <h2>🛠️ Creating from Scratch:</h2>
 <p>1. You can use Spring Initializr (start.spring.io) with the following dependencies:</p>
