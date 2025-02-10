@@ -26,10 +26,10 @@ jobs:
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Build Docker Image
-        run: docker build -t your-dockerhub-username/spring-boot-k8s:${{ github.sha }} .
+        run: docker build -t max3no/spring-boot-k8s:${{ github.sha }} .
 
       - name: Push Image to Docker Hub
-        run: docker push your-dockerhub-username/spring-boot-k8s:${{ github.sha }}
+        run: docker push max3no/spring-boot-k8s:${{ github.sha }}
 
   deploy:
     runs-on: ubuntu-latest
@@ -46,4 +46,4 @@ jobs:
 
       - name: Deploy to Kubernetes
         run: |
-          kubectl set image deployment/spring-boot-app spring-boot-app=your-dockerhub-username/spring-boot-k8s:${{ github.sha }}
+          kubectl set image deployment/spring-boot-app spring-boot-app=max3no/spring-boot-k8s:${{ github.sha }}
