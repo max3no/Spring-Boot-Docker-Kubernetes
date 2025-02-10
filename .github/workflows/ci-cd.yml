@@ -48,9 +48,15 @@ jobs:
       - name: Set up Kubeconfig
         run: |
           mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBE_CONFIG }}" | base64 --decode > $HOME/.kube/config
-          export KUBECONFIG=$HOME/.kube/config
+          echo "${{ secrets.KUBECONFIG_FIXED }}" | base64 --decode > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
           kubectl config view
+
+      - name: Debug Kubeconfig
+        run: |
+          kubectl config current-context
+          kubectl cluster-info
+          kubectl get nodes
 
       - name: Check Kubernetes Cluster
         run: |
