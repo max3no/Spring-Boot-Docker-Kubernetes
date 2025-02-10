@@ -1,70 +1,23 @@
-name: CI/CD Pipeline
+name: CI - Build & Push Docker Image
 
 on:
   push:
     branches:
-      - main
-  workflow_dispatch:
+      - main  # Runs when pushing to the main branch
 
 jobs:
-  build-and-deploy:
-    name: Build, Push & Deploy to Kubernetes
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Build Spring Boot JAR
-        run: |
-          chmod +x mvnw
-          ./mvnw clean package -DskipTests
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      - name: Build Docker image
-        run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/spring-boot-k8s:${{ github.sha }} .
+      - name: Build Docker Image
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/spring-boot-app:latest .
 
-      - name: Push Docker image to Docker Hub
-        run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/spring-boot-k8s:${{ github.sha }}
-
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: 'latest'
-
-      - name: Set up Kubeconfig
-        run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBECONFIG_FIXED }}" | base64 --decode > $HOME/.kube/config
-          chmod 600 $HOME/.kube/config
-          kubectl config view
-
-      - name: Debug Kubeconfig
-        run: |
-          kubectl config current-context
-          kubectl cluster-info
-          kubectl get nodes
-
-      - name: Check Kubernetes Cluster
-        run: |
-          kubectl cluster-info
-          kubectl get nodes
-
-      - name: Deploy to Kubernetes
-        run: |
-          export KUBECONFIG=$HOME/.kube/config
-          kubectl cluster-info   # Check if the cluster is reachable
-          kubectl set image deployment/spring-boot-app spring-boot-container=***/spring-boot-k8s:${{ github.sha }}
+      - name: Push Docker Image to Docker Hub
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/spring-boot-app:latest
